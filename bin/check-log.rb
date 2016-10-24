@@ -55,7 +55,9 @@ class CheckLog < Sensu::Plugin::Check::CLI
   option :pattern,
          description: 'Pattern to search for',
          short: '-q PAT',
-         long: '--pattern PAT'
+         long: '--pattern PAT',
+         proc: proc { |s| Regexp.new(s, Regexp::IGNORECASE) },
+         default: /(?!)/
 
   option :exclude,
          description: 'Pattern to exclude from matching',
@@ -183,7 +185,7 @@ class CheckLog < Sensu::Plugin::Check::CLI
       line = line.encode('UTF-8', invalid: :replace, replace: '')
       bytes_read += line.bytesize
       if config[:case_insensitive]
-        m = line.downcase.match(config[:pattern].downcase) unless line.match(config[:exclude])
+        m = line.downcase.match(config[:pattern]) unless line.match(config[:exclude])
       else
         m = line.match(config[:pattern]) unless line.match(config[:exclude])
       end
